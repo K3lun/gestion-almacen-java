@@ -1,10 +1,12 @@
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 /**
  * Clase Main
  * Programa principal. Primero crea el almacén y varios objetos Producto para
- * probar los constructores y los métodos, y después abre un menú en consola
- * para que el usuario pueda usar la aplicación.
+ * probar los constructores y los métodos, luego prueba las clases derivadas
+ * (herencia) y después abre un menú en consola para usar la aplicación.
  */
 public class Main {
 
@@ -43,8 +45,42 @@ public class Main {
         System.out.println("Entrada de -5 piezas a P003: " + (p3.agregarStock(-5) ? "listo" : "cantidad no válida"));
         System.out.println();
 
-        // 3) Listados y totales
-        System.out.println("--- Prueba 3: inventario actual ---");
+        // 3) Herencia: objetos de las clases derivadas de Producto
+        System.out.println("--- Prueba 3: herencia (clases derivadas) ---");
+        ProductoPerecedero yogurt = new ProductoPerecedero("P006", "Caja de yogurt", "Alimentos",
+                120.00, 30, 10, LocalDate.now().plusDays(20));
+        ProductoPerecedero galletas = new ProductoPerecedero("P007", "Caja de galletas", "Alimentos",
+                85.00, 15, 5, LocalDate.now().minusDays(3));   // ya vencido a propósito
+        ProductoElectronico scanner = new ProductoElectronico("P008", "Escáner de código", "Electrónica",
+                1450.00, 6, 3, "Zebra", 12);
+
+        // Las clases derivadas se agregan al almacén igual que un Producto normal
+        almacen.agregarProducto(yogurt);
+        almacen.agregarProducto(galletas);
+        almacen.agregarProducto(scanner);
+
+        // Métodos HEREDADOS de Producto (no se volvieron a escribir en las hijas)
+        System.out.println("Entrada de 4 piezas al escáner (método heredado): "
+                + (scanner.agregarStock(4) ? "listo" : "error"));
+        System.out.println("Salida de 2 piezas del escáner (método heredado): "
+                + (scanner.retirarStock(2) ? "listo" : "error"));
+        System.out.println("Nombre del yogurt (getter heredado): " + yogurt.getNombre());
+
+        // Métodos EXCLUSIVOS de cada clase derivada
+        System.out.println("¿El yogurt está vencido? " + yogurt.estaVencido()
+                + " (faltan " + yogurt.diasParaCaducar() + " días)");
+        System.out.println("¿Las galletas están vencidas? " + galletas.estaVencido());
+        System.out.println("Extender garantía del escáner 6 meses: "
+                + (scanner.extenderGarantia(6) ? "listo" : "error")
+                + " -> ahora tiene " + scanner.getGarantiaMeses() + " meses");
+
+        // Método SOBRESCRITO: valorTotal() se comporta distinto en ProductoPerecedero
+        System.out.printf("Valor del yogurt (30 x $120, vigente): $%.2f%n", yogurt.valorTotal());
+        System.out.printf("Valor de las galletas (15 x $85, vencidas): $%.2f%n", galletas.valorTotal());
+        System.out.println();
+
+        // 4) Listados y totales
+        System.out.println("--- Prueba 4: inventario actual ---");
         almacen.listarProductos();
         System.out.println();
         System.out.printf("Valor total del inventario: $%.2f%n", almacen.valorTotalInventario());
@@ -53,7 +89,7 @@ public class Main {
         almacen.listarBajoStock();
         System.out.println();
 
-        // 4) Menú interactivo
+        // 5) Menú interactivo
         menu(almacen);
     }
 
@@ -133,7 +169,21 @@ public class Main {
             categoria = "General";
         }
 
-        Producto nuevo = new Producto(codigo, nombre, categoria, precio, stock, minimo);
+        // Se elige qué tipo de producto es (clase base o alguna clase derivada)
+        int tipo = leerEntero(sc, "Tipo (1 = General, 2 = Perecedero, 3 = Electrónico): ");
+        Producto nuevo;
+        if (tipo == 2) {
+            LocalDate caducidad = leerFecha(sc, "Fecha de caducidad (AAAA-MM-DD): ");
+            nuevo = new ProductoPerecedero(codigo, nombre, categoria, precio, stock, minimo, caducidad);
+        } else if (tipo == 3) {
+            System.out.print("Marca: ");
+            String marca = sc.nextLine().trim();
+            int garantia = leerEntero(sc, "Garantía en meses: ");
+            nuevo = new ProductoElectronico(codigo, nombre, categoria, precio, stock, minimo, marca, garantia);
+        } else {
+            nuevo = new Producto(codigo, nombre, categoria, precio, stock, minimo);
+        }
+
         if (almacen.agregarProducto(nuevo)) {
             System.out.println("Producto agregado correctamente.");
         } else {
@@ -171,6 +221,7 @@ public class Main {
             System.out.printf("Precio:    $%.2f%n", p.getPrecio());
             System.out.println("Stock:     " + p.getStock() + " (mínimo " + p.getStockMinimo() + ")");
             System.out.printf("Valor:     $%.2f%n", p.valorTotal());
+            System.out.println("Detalle:   " + p.getDetalle());
         }
     }
 
@@ -193,6 +244,18 @@ public class Main {
                 return Integer.parseInt(sc.nextLine().trim());
             } catch (NumberFormatException e) {
                 System.out.println("Escribe un número entero válido.");
+            }
+        }
+    }
+
+    // Lee una fecha con formato AAAA-MM-DD; si está mal escrita, vuelve a preguntar
+    private static LocalDate leerFecha(Scanner sc, String mensaje) {
+        while (true) {
+            System.out.print(mensaje);
+            try {
+                return LocalDate.parse(sc.nextLine().trim());
+            } catch (DateTimeParseException e) {
+                System.out.println("Fecha no válida. Usa el formato AAAA-MM-DD (ejemplo: 2026-12-31).");
             }
         }
     }

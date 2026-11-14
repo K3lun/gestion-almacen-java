@@ -1,19 +1,24 @@
 /**
- * Clase Producto
+ * Clase Producto (CLASE BASE)
  * Representa un producto que se guarda en el almacén (por ejemplo una caja,
  * una tarima o un artículo suelto). Cada objeto Producto guarda sus propios
  * datos y sabe hacer sus operaciones básicas: recibir y sacar existencias.
+ *
+ * HERENCIA: de esta clase se derivan ProductoPerecedero y ProductoElectronico.
+ * Las clases derivadas reutilizan estos atributos y métodos con "extends" y
+ * pueden sobrescribir algunos (valorTotal y getDetalle).
  */
 public class Producto {
 
     // ---------- Atributos ----------
-    // Son privados para que nadie los cambie directo desde fuera de la clase.
-    private String codigo;
-    private String nombre;
-    private String categoria;
-    private double precio;
-    private int stock;        // piezas que hay ahorita en el almacén
-    private int stockMinimo;  // si el stock baja de aquí, hay que reabastecer
+    // Ahora son "protected": nadie de fuera de la clase los puede tocar, pero
+    // las clases derivadas (hijas) sí pueden usarlos directamente (herencia).
+    protected String codigo;
+    protected String nombre;
+    protected String categoria;
+    protected double precio;
+    protected int stock;        // piezas que hay ahorita en el almacén
+    protected int stockMinimo;  // si el stock baja de aquí, hay que reabastecer
 
     // ---------- Constructores ----------
 
@@ -119,11 +124,21 @@ public class Producto {
     }
 
     /**
+     * Dato extra que se muestra en la última columna de la tabla.
+     * En la clase base no hay nada especial; las clases derivadas lo
+     * sobrescriben para mostrar su información propia (caducidad, garantía...).
+     */
+    public String getDetalle() {
+        return "-";
+    }
+
+    /**
      * Texto de una línea para mostrar el producto en la tabla del inventario.
+     * Usa getDetalle(), así cada tipo de producto muestra su propio detalle.
      */
     @Override
     public String toString() {
-        return String.format("%-8s %-24s %-12s $%9.2f %6d %6d",
-                codigo, nombre, categoria, precio, stock, stockMinimo);
+        return String.format("%-8s %-24s %-12s $%9.2f %6d %6d  %s",
+                codigo, nombre, categoria, precio, stock, stockMinimo, getDetalle());
     }
 }

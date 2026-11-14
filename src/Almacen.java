@@ -116,8 +116,8 @@ public class Almacen {
 
     // Método auxiliar para no repetir el encabezado de la tabla
     private void imprimirEncabezado() {
-        System.out.println(String.format("%-8s %-24s %-12s %10s %6s %6s",
-                "CÓDIGO", "NOMBRE", "CATEGORÍA", "PRECIO", "STOCK", "MÍN."));
-        System.out.println("-".repeat(72));
+        System.out.println(String.format("%-8s %-24s %-12s %10s %6s %6s  %s",
+                "CÓDIGO", "NOMBRE", "CATEGORÍA", "PRECIO", "STOCK", "MÍN.", "DETALLE"));
+        System.out.println("-".repeat(100));
     }
 }
